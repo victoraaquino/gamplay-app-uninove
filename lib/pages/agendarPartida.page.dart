@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameplayapp/components/category.component.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Servidor {
   int id;
@@ -26,6 +27,13 @@ class _AgendarPartidaState extends State<AgendarPartida> {
   List<Servidor> listaServidores = [];
   Servidor servidorSelecionado =
       Servidor(cargo: "", id: 0, imagem: "", nome: "");
+
+  //Controllers
+  TextEditingController diaController = TextEditingController();
+  TextEditingController mesController = TextEditingController();
+  TextEditingController horaController = TextEditingController();
+  TextEditingController minutoController = TextEditingController();
+  TextEditingController descricaoController = TextEditingController();
 
   void carregaServidores() {
     setState(() {
@@ -60,268 +68,307 @@ class _AgendarPartidaState extends State<AgendarPartida> {
           ),
         ),
       ),
-      body: Container(
-        width: double.infinity,
-        color: const Color(0xff0A1033),
-        padding: const EdgeInsets.only(top: 32, left: 24, right: 24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Categoria',
-              style: GoogleFonts.rajdhani(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xffDDE3F0),
+      body: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height,
+          color: const Color(0xff0A1033),
+          padding: const EdgeInsets.only(top: 32, left: 24, right: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Categoria',
+                style: GoogleFonts.rajdhani(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xffDDE3F0),
+                ),
               ),
-            ),
-            const SizedBox(height: 18),
-            const Category(editMode: true),
-            const SizedBox(height: 32),
-            GestureDetector(
-              onTap: () async {
-                print(listaServidores);
-                Servidor servidorSelecionado =
-                    await showModalBottomSheet<Servidor>(
-                  context: context,
-                  backgroundColor: const Color(0xff0E1647),
-                  builder: (BuildContext context) {
-                    return ListView.builder(
-                      itemCount: listaServidores.length,
-                      itemBuilder: (context, index) {
-                        return CardServidor(
-                          cargo: listaServidores[index].cargo,
-                          imagem: listaServidores[index].imagem,
-                          nome: listaServidores[index].nome,
-                          id: listaServidores[index].id,
-                        );
-                      },
-                    );
-                  },
-                ) as Servidor;
+              const SizedBox(height: 18),
+              const Category(editMode: true),
+              const SizedBox(height: 32),
+              GestureDetector(
+                onTap: () async {
+                  Servidor servidorSelecionado =
+                      await showModalBottomSheet<Servidor>(
+                    context: context,
+                    backgroundColor: const Color(0xff0E1647),
+                    builder: (BuildContext context) {
+                      return ListView.builder(
+                        itemCount: listaServidores.length,
+                        itemBuilder: (context, index) {
+                          return CardServidor(
+                            cargo: listaServidores[index].cargo,
+                            imagem: listaServidores[index].imagem,
+                            nome: listaServidores[index].nome,
+                            id: listaServidores[index].id,
+                          );
+                        },
+                      );
+                    },
+                  ) as Servidor;
 
-                setState(() {
-                  this.servidorSelecionado = servidorSelecionado;
-                });
-              },
-              child: Container(
+                  setState(() {
+                    this.servidorSelecionado = servidorSelecionado;
+                  });
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xff243189),
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.only(right: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 68,
+                        height: 68,
+                        decoration: servidorSelecionado.imagem != ""
+                            ? BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xff243189),
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xff1D2766),
+                                image: DecorationImage(
+                                  image: AssetImage(servidorSelecionado.imagem),
+                                  fit: BoxFit.cover,
+                                  opacity:
+                                      servidorSelecionado.imagem != "" ? 1 : 0,
+                                ),
+                              )
+                            : BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xff243189),
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xff1D2766),
+                              ),
+                      ),
+                      Text(
+                        servidorSelecionado.nome != ""
+                            ? servidorSelecionado.nome
+                            : 'Selecione um servidor',
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xffDDE3F0),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Color(0xffDDE3F0),
+                        size: 18,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dia e mes',
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xffDDE3F0),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            margin: const EdgeInsets.only(right: 3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xff243189),
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xff1D2766),
+                            ),
+                            child: TextField(
+                              controller: diaController,
+                              style: GoogleFonts.inter(color: Colors.white),
+                            ),
+                          ),
+                          Text(
+                            '/',
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xffDDE3F0),
+                            ),
+                          ),
+                          Container(
+                            width: 48,
+                            height: 48,
+                            margin: const EdgeInsets.only(left: 3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xff243189),
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xff1D2766),
+                            ),
+                            child: TextField(
+                              controller: mesController,
+                              style: GoogleFonts.inter(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Horário',
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xffDDE3F0),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            margin: const EdgeInsets.only(right: 3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xff243189),
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xff1D2766),
+                            ),
+                            child: TextField(
+                              controller: horaController,
+                              style: GoogleFonts.inter(color: Colors.white),
+                            ),
+                          ),
+                          Text(
+                            ':',
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xffDDE3F0),
+                            ),
+                          ),
+                          Container(
+                            width: 48,
+                            height: 48,
+                            margin: const EdgeInsets.only(left: 3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xff243189),
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xff1D2766),
+                            ),
+                            child: TextField(
+                              controller: minutoController,
+                              style: GoogleFonts.inter(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Descrição',
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xffDDE3F0),
+                    ),
+                  ),
+                  Text(
+                    'Max 100 caracteres',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xffABB1CC),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
                 width: double.infinity,
-                height: 68,
+                height: 95,
+                margin: const EdgeInsets.only(left: 3),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: const Color(0xff243189),
                   ),
                   borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xff1D2766),
                 ),
-                padding: const EdgeInsets.only(right: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: servidorSelecionado.imagem != ""
-                          ? BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xff243189),
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xff1D2766),
-                              image: DecorationImage(
-                                image: AssetImage(servidorSelecionado.imagem),
-                                fit: BoxFit.cover,
-                                opacity:
-                                    servidorSelecionado.imagem != "" ? 1 : 0,
-                              ),
-                            )
-                          : BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xff243189),
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              color: const Color(0xff1D2766),
-                            ),
-                    ),
-                    Text(
-                      servidorSelecionado.nome != ""
-                          ? servidorSelecionado.nome
-                          : 'Selecione um servidor',
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xffDDE3F0),
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Color(0xffDDE3F0),
-                      size: 18,
-                    )
-                  ],
+                child: TextField(
+                  controller: descricaoController,
+                  minLines: 1,
+                  maxLines: 4,
+                  decoration: const InputDecoration(border: InputBorder.none),
+                  style: GoogleFonts.inter(color: Colors.white),
                 ),
               ),
-            ),
-            const SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dia e mes',
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xffDDE3F0),
-                      ),
+              const SizedBox(height: 56),
+              SizedBox(
+                width: double.infinity,
+                height: 56.0,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+
+                    String categoria =
+                        prefs.getString('categoriaSelecionada') as String;
+                    Servidor servidor = servidorSelecionado;
+                    String dia = diaController.value.text;
+                    String mes = mesController.value.text;
+                    String hora = horaController.value.text;
+                    String minuto = minutoController.value.text;
+                    String descricao = descricaoController.value.text;
+
+                    //TODO: fazer uma requisição para agendar a partida
+
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(0),
+                      backgroundColor: const Color(0xffE51C44)),
+                  child: Text(
+                    'Agendar',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.0,
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          margin: const EdgeInsets.only(right: 3),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xff243189),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xff1D2766),
-                          ),
-                        ),
-                        Text(
-                          '/',
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xffDDE3F0),
-                          ),
-                        ),
-                        Container(
-                          width: 48,
-                          height: 48,
-                          margin: const EdgeInsets.only(left: 3),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xff243189),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xff1D2766),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Horário',
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xffDDE3F0),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          margin: const EdgeInsets.only(right: 3),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xff243189),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xff1D2766),
-                          ),
-                        ),
-                        Text(
-                          ':',
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xffDDE3F0),
-                          ),
-                        ),
-                        Container(
-                          width: 48,
-                          height: 48,
-                          margin: const EdgeInsets.only(left: 3),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xff243189),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xff1D2766),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: 28),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Descrição',
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xffDDE3F0),
                   ),
                 ),
-                Text(
-                  'Max 100 caracteres',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xffABB1CC),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              height: 95,
-              margin: const EdgeInsets.only(left: 3),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color(0xff243189),
-                ),
-                borderRadius: BorderRadius.circular(10),
-                color: const Color(0xff1D2766),
-              ),
-            ),
-            const SizedBox(height: 56),
-            SizedBox(
-              width: double.infinity,
-              height: 56.0,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    backgroundColor: const Color(0xffE51C44)),
-                child: Text(
-                  'Agendar',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.0,
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

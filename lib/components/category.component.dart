@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameplayapp/enum/categorias.enum.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Category extends StatefulWidget {
   final bool editMode;
@@ -12,6 +13,13 @@ class Category extends StatefulWidget {
 }
 
 class _CategoryState extends State<Category> {
+  List<CardCategoryClass> listaCategorias = [
+    CardCategoryClass(nome: Categorias.ranqueada, selecionado: false),
+    CardCategoryClass(nome: Categorias.campeonatos, selecionado: false),
+    CardCategoryClass(nome: Categorias.casual, selecionado: false),
+    CardCategoryClass(nome: Categorias.x1, selecionado: false)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -23,21 +31,94 @@ class _CategoryState extends State<Category> {
             image: 'ranked.png',
             categoryName: Categorias.ranqueada,
             editMode: widget.editMode,
+            selecionado: listaCategorias[0].selecionado,
+            callback: (val) async {
+              if (val) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString(
+                    'categoriaSelecionada', listaCategorias[0].nome);
+              }
+              setState(() {
+                listaCategorias[0].selecionado = val;
+                if (val) {
+                  listaCategorias.asMap().forEach((index, category) {
+                    if (index != 0) {
+                      listaCategorias[index].selecionado = false;
+                    }
+                  });
+                }
+              });
+            },
           ),
           CardCategory(
             image: 'x1.png',
             categoryName: Categorias.x1,
             editMode: widget.editMode,
+            selecionado: listaCategorias[1].selecionado,
+            callback: (val) async {
+              if (val) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString(
+                    'categoriaSelecionada', listaCategorias[1].nome);
+              }
+              setState(() {
+                listaCategorias[1].selecionado = val;
+                if (val) {
+                  listaCategorias.asMap().forEach((index, category) {
+                    if (index != 1) {
+                      listaCategorias[index].selecionado = false;
+                    }
+                  });
+                }
+              });
+            },
           ),
           CardCategory(
             image: 'casual.png',
             categoryName: Categorias.casual,
             editMode: widget.editMode,
+            selecionado: listaCategorias[2].selecionado,
+            callback: (val) async {
+              if (val) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString(
+                    'categoriaSelecionada', listaCategorias[2].nome);
+              }
+              setState(() {
+                listaCategorias[2].selecionado = val;
+                if (val) {
+                  listaCategorias.asMap().forEach((index, category) {
+                    if (index != 2) {
+                      listaCategorias[index].selecionado = false;
+                    }
+                  });
+                }
+              });
+            },
           ),
           CardCategory(
             image: 'ranked.png',
             categoryName: Categorias.campeonatos,
             editMode: widget.editMode,
+            selecionado: listaCategorias[3].selecionado,
+            callback: (val) async {
+              if (val) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString(
+                    'categoriaSelecionada', listaCategorias[3].nome);
+              }
+
+              setState(() {
+                listaCategorias[3].selecionado = val;
+                if (val) {
+                  listaCategorias.asMap().forEach((index, category) {
+                    if (index != 3) {
+                      listaCategorias[index].selecionado = false;
+                    }
+                  });
+                }
+              });
+            },
           ),
         ],
       ),
@@ -45,24 +126,35 @@ class _CategoryState extends State<Category> {
   }
 }
 
+typedef void BoolCallback(bool val);
+
+class CardCategoryClass {
+  String nome;
+  bool selecionado;
+
+  CardCategoryClass({required this.nome, required this.selecionado});
+}
+
 class CardCategory extends StatefulWidget {
   final String image;
   final String categoryName;
   final bool editMode;
+  final BoolCallback callback;
+  bool selecionado;
 
-  const CardCategory(
+  CardCategory(
       {super.key,
       required this.image,
       required this.categoryName,
-      this.editMode = false});
+      this.editMode = false,
+      required this.callback,
+      required this.selecionado});
 
   @override
   State<CardCategory> createState() => _CardCategoryState();
 }
 
 class _CardCategoryState extends State<CardCategory> {
-  bool selecionado = false;
-
   Widget retornaItemNormal() {
     return Container(
       width: 104,
@@ -100,7 +192,8 @@ class _CardCategoryState extends State<CardCategory> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          selecionado = !selecionado;
+          widget.selecionado = !widget.selecionado;
+          widget.callback(widget.selecionado);
         });
       },
       child: Container(
@@ -112,8 +205,10 @@ class _CardCategoryState extends State<CardCategory> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xff243189).withOpacity(selecionado ? 1 : 0.5),
-                const Color(0xff1B2565).withOpacity(selecionado ? 1 : 0.5)
+                const Color(0xff243189)
+                    .withOpacity(widget.selecionado ? 1 : 0.5),
+                const Color(0xff1B2565)
+                    .withOpacity(widget.selecionado ? 1 : 0.5)
               ]),
           borderRadius: BorderRadius.circular(10),
         ),
@@ -125,12 +220,12 @@ class _CardCategoryState extends State<CardCategory> {
               width: 48.0,
               height: 48.0,
               image: AssetImage("assets/categories/${widget.image}"),
-              opacity: AlwaysStoppedAnimation(selecionado ? 1 : 0.5),
+              opacity: AlwaysStoppedAnimation(widget.selecionado ? 1 : 0.5),
             ),
             Text(
               widget.categoryName,
               style: GoogleFonts.rajdhani(
-                color: Colors.white.withOpacity(selecionado ? 1 : 0.5),
+                color: Colors.white.withOpacity(widget.selecionado ? 1 : 0.5),
                 fontSize: 15.0,
               ),
             )
