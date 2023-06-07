@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameplayapp/pages/agendarPartida.page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Toolbox extends StatefulWidget {
@@ -68,7 +69,12 @@ class _ToolboxState extends State<Toolbox> {
           width: 48.0,
           height: 48.0,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AgendarPartida()));
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xffE51C44),
             ),
