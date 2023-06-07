@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gameplayapp/components/category.component.dart';
 import 'package:gameplayapp/components/toolbox.component.dart';
 import 'package:gameplayapp/enum/categorias.enum.dart';
+import 'package:gameplayapp/pages/detalhes.page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,13 +14,15 @@ class PartidaAgendada {
   String imagem;
   String categoria;
   bool isAnfitriao;
+  String descricao;
 
   PartidaAgendada(
       {required this.nome,
       required this.data,
       required this.imagem,
       required this.categoria,
-      required this.isAnfitriao});
+      required this.isAnfitriao,
+      required this.descricao});
 }
 
 class Home extends StatefulWidget {
@@ -34,17 +37,20 @@ class _HomeState extends State<Home> {
 
   List<PartidaAgendada> listaPartidas = [
     PartidaAgendada(
-        nome: 'OTRIO',
-        data: '18/06 às 21:00h',
-        imagem: 'assets/manoel-gomes.jpg',
-        categoria: Categorias.ranqueada,
-        isAnfitriao: true),
+      nome: 'OTRIO',
+      data: '18/06 às 21:00h',
+      imagem: 'assets/manoel-gomes.jpg',
+      categoria: Categorias.ranqueada,
+      isAnfitriao: true,
+      descricao: 'Hoje só paro no challenge',
+    ),
     PartidaAgendada(
         nome: 'Xablau Universe',
         data: '10/07 às 18:00h',
         imagem: 'assets/xablau.jpg',
         categoria: Categorias.casual,
-        isAnfitriao: false),
+        isAnfitriao: false,
+        descricao: 'Hoje é proibido tiltar'),
   ];
 
   void carregaLista() async {
@@ -58,7 +64,8 @@ class _HomeState extends State<Home> {
             data: partidamap['data'],
             imagem: partidamap['imagem'],
             categoria: partidamap['categoria'],
-            isAnfitriao: partidamap['isAnfitriao']);
+            isAnfitriao: partidamap['isAnfitriao'],
+            descricao: partidamap['descricao']);
         listaPartidas.add(partidaAgendada);
       });
     }
@@ -77,7 +84,6 @@ class _HomeState extends State<Home> {
           padding: const EdgeInsets.only(right: 24.0, left: 24.0),
           child: Toolbox(
             callback: () {
-              print('macarrao');
               carregaLista();
             },
           ),
@@ -124,12 +130,25 @@ class _HomeState extends State<Home> {
                       child: ListView.builder(
                         itemCount: listaPartidas.length,
                         itemBuilder: (context, i) {
-                          return CardMatches(
-                            isAnfitriao: listaPartidas[i].isAnfitriao,
-                            tipoCategoria: listaPartidas[i].categoria,
-                            data: listaPartidas[i].data,
-                            nome: listaPartidas[i].nome,
-                            imagem: listaPartidas[i].imagem,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Detalhes(
+                                    nome: listaPartidas[i].nome,
+                                    descricao: listaPartidas[i].descricao,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CardMatches(
+                              isAnfitriao: listaPartidas[i].isAnfitriao,
+                              tipoCategoria: listaPartidas[i].categoria,
+                              data: listaPartidas[i].data,
+                              nome: listaPartidas[i].nome,
+                              imagem: listaPartidas[i].imagem,
+                            ),
                           );
                         },
                       ),

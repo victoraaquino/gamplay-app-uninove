@@ -359,7 +359,7 @@ class _AgendarPartidaState extends State<AgendarPartida> {
 
                     //TODO: fazer uma requisição para agendar a partida
                     await prefs.setString("partida_agendada",
-                        '{"data":"$dia/$mes às $hora:${minuto}h","nome": "${servidor.nome}", "isAnfitriao": true, "imagem":"${servidor.imagem}", "categoria":"$categoria"}');
+                        '{"data":"$dia/$mes às $hora:${minuto}h","nome": "${servidor.nome}", "isAnfitriao": true, "imagem":"${servidor.imagem}", "categoria":"$categoria", "descricao":"$descricao"}');
 
                     // ignore: use_build_context_synchronously
                     Navigator.pop(context, 'banana');
