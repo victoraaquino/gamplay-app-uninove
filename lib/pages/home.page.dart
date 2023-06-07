@@ -1,8 +1,26 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gameplayapp/components/category.component.dart';
 import 'package:gameplayapp/components/toolbox.component.dart';
 import 'package:gameplayapp/enum/categorias.enum.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class PartidaAgendada {
+  String nome;
+  String data;
+  String imagem;
+  String categoria;
+  bool isAnfitriao;
+
+  PartidaAgendada(
+      {required this.nome,
+      required this.data,
+      required this.imagem,
+      required this.categoria,
+      required this.isAnfitriao});
+}
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,6 +31,38 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool opacidade = true;
+
+  List<PartidaAgendada> listaPartidas = [
+    PartidaAgendada(
+        nome: 'OTRIO',
+        data: '18/06 às 21:00h',
+        imagem: 'assets/manoel-gomes.jpg',
+        categoria: Categorias.ranqueada,
+        isAnfitriao: true),
+    PartidaAgendada(
+        nome: 'Xablau Universe',
+        data: '10/07 às 18:00h',
+        imagem: 'assets/xablau.jpg',
+        categoria: Categorias.casual,
+        isAnfitriao: false),
+  ];
+
+  void carregaLista() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String partidaAgendadaTexto = prefs.getString('partida_agendada') as String;
+    if (partidaAgendadaTexto != "") {
+      setState(() {
+        Map<String, dynamic> partidamap = jsonDecode(partidaAgendadaTexto);
+        PartidaAgendada partidaAgendada = PartidaAgendada(
+            nome: partidamap['nome'],
+            data: partidamap['data'],
+            imagem: partidamap['imagem'],
+            categoria: partidamap['categoria'],
+            isAnfitriao: partidamap['isAnfitriao']);
+        listaPartidas.add(partidaAgendada);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +75,12 @@ class _HomeState extends State<Home> {
           alignment: Alignment.center,
           color: const Color(0xff0E1647),
           padding: const EdgeInsets.only(right: 24.0, left: 24.0),
-          child: const Toolbox(),
+          child: Toolbox(
+            callback: () {
+              print('macarrao');
+              carregaLista();
+            },
+          ),
         ),
       ),
       body: Container(
@@ -52,7 +107,7 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         Text(
-                          'Total 6',
+                          'Total ${listaPartidas.length}',
                           style: GoogleFonts.inter(
                             color: const Color(0xffABB1CC),
                             fontSize: 13.0,
@@ -63,13 +118,21 @@ class _HomeState extends State<Home> {
                     const SizedBox(
                       height: 24.0,
                     ),
-                    CardMatches(
-                      isAnfitriao: true,
-                      tipoCategoria: Categorias.ranqueada,
-                    ),
-                    CardMatches(
-                      isAnfitriao: false,
-                      tipoCategoria: Categorias.casual,
+                    SizedBox(
+                      width: double.infinity,
+                      height: 400,
+                      child: ListView.builder(
+                        itemCount: listaPartidas.length,
+                        itemBuilder: (context, i) {
+                          return CardMatches(
+                            isAnfitriao: listaPartidas[i].isAnfitriao,
+                            tipoCategoria: listaPartidas[i].categoria,
+                            data: listaPartidas[i].data,
+                            nome: listaPartidas[i].nome,
+                            imagem: listaPartidas[i].imagem,
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -85,9 +148,17 @@ class _HomeState extends State<Home> {
 class CardMatches extends StatefulWidget {
   final bool isAnfitriao;
   final String tipoCategoria;
+  final String data;
+  final String imagem;
+  final String nome;
 
   const CardMatches(
-      {super.key, required this.isAnfitriao, required this.tipoCategoria});
+      {super.key,
+      required this.isAnfitriao,
+      required this.tipoCategoria,
+      required this.data,
+      required this.imagem,
+      required this.nome});
 
   @override
   State<CardMatches> createState() => _CardMatchesState();
@@ -107,8 +178,8 @@ class _CardMatchesState extends State<CardMatches> {
             height: 68.0,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              image: const DecorationImage(
-                image: AssetImage('assets/himeko.png'),
+              image: DecorationImage(
+                image: AssetImage(widget.imagem),
                 fit: BoxFit.cover,
               ),
             ),
@@ -124,7 +195,7 @@ class _CardMatchesState extends State<CardMatches> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Lendários',
+                      Text(widget.nome,
                           style: GoogleFonts.rajdhani(
                             color: const Color(0xffDDE3F0),
                             fontWeight: FontWeight.bold,
@@ -142,7 +213,7 @@ class _CardMatchesState extends State<CardMatches> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '18/06 ás 21:00h',
+                        widget.data,
                         style: GoogleFonts.inter(
                           color: const Color(0xffDDE3F0),
                           fontSize: 13.0,

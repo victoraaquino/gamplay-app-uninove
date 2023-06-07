@@ -3,7 +3,9 @@ import 'package:gameplayapp/pages/agendarPartida.page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Toolbox extends StatefulWidget {
-  const Toolbox({super.key});
+  Function callback;
+
+  Toolbox({super.key, required this.callback});
 
   @override
   State<Toolbox> createState() => _ToolboxState();
@@ -46,7 +48,7 @@ class _ToolboxState extends State<Toolbox> {
                       ),
                     ),
                     Text(
-                      'Thiago',
+                      'Vk',
                       style: GoogleFonts.rajdhani(
                           color: Colors.white,
                           fontSize: 24.0,
@@ -69,11 +71,14 @@ class _ToolboxState extends State<Toolbox> {
           width: 48.0,
           height: 48.0,
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AgendarPartida()));
+            onPressed: () async {
+              String retorno = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AgendarPartida(),
+                ),
+              );
+              widget.callback();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xffE51C44),

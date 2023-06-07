@@ -39,12 +39,19 @@ class _AgendarPartidaState extends State<AgendarPartida> {
     setState(() {
       //TODO: deve buscar na api os servidores e carregar eles aqui
       listaServidores = [];
-      Servidor servidor = Servidor(
-          cargo: 'Convidado',
+      Servidor servidor1 = Servidor(
           id: 1,
-          imagem: 'assets/himeko.png',
-          nome: 'Fãs da Himeko');
-      listaServidores.add(servidor);
+          nome: "OTRIO",
+          cargo: "Administrador",
+          imagem: "assets/manoel-gomes.jpg");
+      Servidor servidor2 = Servidor(
+          id: 2,
+          nome: "Xablau Universe",
+          cargo: "Visitante",
+          imagem: "assets/xablau.jpg");
+
+      listaServidores.add(servidor1);
+      listaServidores.add(servidor2);
     });
   }
 
@@ -351,8 +358,11 @@ class _AgendarPartidaState extends State<AgendarPartida> {
                     String descricao = descricaoController.value.text;
 
                     //TODO: fazer uma requisição para agendar a partida
+                    await prefs.setString("partida_agendada",
+                        '{"data":"$dia/$mes às $hora:${minuto}h","nome": "${servidor.nome}", "isAnfitriao": true, "imagem":"${servidor.imagem}", "categoria":"$categoria"}');
 
-                    Navigator.pop(context);
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context, 'banana');
                   },
                   style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(0),

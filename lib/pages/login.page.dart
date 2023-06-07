@@ -60,11 +60,6 @@ class _LoginState extends State<Login> {
             height: 56.0,
             child: ElevatedButton(
               onPressed: () async {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Home()));
-
-                return;
-
                 final WebViewController controller = WebViewController()
                   ..setJavaScriptMode(JavaScriptMode.unrestricted)
                   ..setBackgroundColor(const Color(0x00000000))
@@ -86,7 +81,7 @@ class _LoginState extends State<Login> {
                     ),
                   )
                   ..loadRequest(Uri.parse(
-                      'https://discord.com/oauth2/authorize?client_id=1101180680244834314&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fapi%2Fauth%2Fdiscord%2Fredirect&response_type=code&scope=identify%20guilds'));
+                      'https://discord.com/api/oauth2/authorize?client_id=1101180680244834314&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Fredirect&response_type=code&scope=identify%20connections%20email%20guilds'));
 
                 String response = await Navigator.push(
                   context,
@@ -95,20 +90,23 @@ class _LoginState extends State<Login> {
                   ),
                 );
 
-                String code = response.split('?code=')[1];
+                //TODO: buscar os dados do backend
 
-                var client = http.Client();
+                // String code = response.split('?code=')[1];
 
-                try {
-                  var response = await client.post(
-                      Uri.http('localhost:4000', '/login'),
-                      body: {'code': code});
-                } finally {
-                  client.close();
-                }
+                // var client = http.Client();
 
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Home()));
+                // try {
+                //   var response = await client.post(
+                //       Uri.http('localhost:4000', '/login'),
+                //       body: {'code': code});
+                // } finally {
+                //   client.close();
+                // }
+
+                // ignore: use_build_context_synchronously
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Home()));
               },
               style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(0),
